@@ -10,7 +10,7 @@ import albumentations as A
 from albumentations.pytorch import ToTensorV2
 from tqdm import tqdm
 
-# 🔧 Hyperparameters
+# Hyperparameters and config
 ROOT_DIR = "VOC2012_train_val"
 EPOCHS = 30
 START_EPOCH = 1
@@ -20,18 +20,18 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 SAVE_INTERVAL = 5
 SAVE_DIR = "models/advanced_checkpoints"
 
-# 🧠 Model
+# Model
 model = UNET(in_channels=3, out_channels=1).to(DEVICE)
 if START_EPOCH > 1:
     ckpt_path = os.path.join(SAVE_DIR, f"unet_epoch_{START_EPOCH - 1}.pth")
     print(f"🔁 Loading checkpoint from: {ckpt_path}")
     model.load_state_dict(torch.load(ckpt_path, map_location=DEVICE))
 
-# 📉 Loss & Optimizer
+# Loss & Optimizer
 criterion = BCEDiceLoss()
 optimizer = optim.Adam(model.parameters(), lr=LR)
 
-# 🔁 Transforms
+# Transforms
 transform = A.Compose([
     A.Resize(height=256, width=256),
     A.HorizontalFlip(p=0.5),
@@ -40,7 +40,7 @@ transform = A.Compose([
     ToTensorV2(),
 ])
 
-# 📦 Dataset & Loader
+# Dataset & Loader
 train_dataset = PascalVOCDataset(
     root_dir=ROOT_DIR,
     split="train",
@@ -80,4 +80,4 @@ for epoch in range(START_EPOCH, EPOCHS + 1):
 # Final save
 final_path = os.path.join(SAVE_DIR, "unet_final.pth")
 torch.save(model.state_dict(), final_path)
-print(f"\n🎉 Training completed. Final model saved at: {final_path}")
+print(f"\n Training completed. Final model saved at: {final_path}")
